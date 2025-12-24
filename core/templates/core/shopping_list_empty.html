@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Список покупок - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h3 class="mb-0">🛒 Список покупок пуст</h3>
+            </div>
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <h1>📦</h1>
+                    <h4>Нет данных для формирования списка покупок</h4>
+                    <p class="text-muted">
+                        У выбранных блюд не указаны ингредиенты
+                    </p>
+                </div>
+                
+                <div class="alert alert-info text-start">
+                    <h5>💡 Что нужно сделать:</h5>
+                    <ol>
+                        <li>Добавьте ингредиенты к блюдам через админку</li>
+                        <li>Или используйте команду создания тестовых данных</li>
+                        <li>Убедитесь, что у блюд есть связи с ингредиентами</li>
+                    </ol>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>Выбранные блюда:</h5>
+                    <div class="row mt-3">
+                        {% for dish in popular_dishes %}
+                        <div class="col-md-4 mb-2">
+                            <div class="border rounded p-2">
+                                <strong>{{ dish.name }}</strong><br>
+                                <small class="text-muted">
+                                    Ингредиентов: {{ dish.ingredients_list.count }}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/event/{{ event.id }}/menu/" class="btn btn-primary me-2">
+                        ← Вернуться к меню
+                    </a>
+                    <a href="/admin/core/dishingredient/add/" class="btn btn-success">
+                        ➕ Добавить ингредиенты
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>⚡ Быстрое решение</h5>
+            </div>
+            <div class="card-body">
+                <p>Выполните в терминале команду:</p>
+                <div class="alert alert-secondary">
+                    <code>python manage.py create_test_data</code>
+                </div>
+                <p>Эта команда создаст тестовые ингредиенты для всех блюд.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

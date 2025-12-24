@@ -1,0 +1,151 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Просмотр мероприятия - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">📋 Просмотр мероприятия: {{ event.name }}</h3>
+                        <p class="mb-0">{{ event.event_date }} • {{ event.number_of_guests }} гостей</p>
+                    </div>
+                    <a href="/event/{{ event.id }}/menu/" class="btn btn-light">
+                        🎯 Сгенерировать меню
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">👥 Гости и их предпочтения</h5>
+                        <span class="badge bg-primary">{{ guests.count }} гостей</span>
+                    </div>
+                    <div class="card-body">
+                        {% for guest in guests %}
+                        <div class="card mb-3">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">👤 {{ guest.name }}</h6>
+                                <div>
+                                    <a href="/event/{{ event.id }}/guest/{{ guest.id }}/edit/"
+                                       class="btn btn-sm btn-outline-warning">
+                                        ✏️ Редактировать
+                                    </a>
+                                    <a href="/event/{{ event.id }}/guest/{{ guest.id }}/delete/"
+                                       class="btn btn-sm btn-outline-danger ms-1"
+                                       onclick="return confirm('Удалить гостя {{ guest.name }}?')">
+                                        🗑️ Удалить
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% if guest.favorite_dishes.all %}
+                                <div class="row">
+                                    {% for dish in guest.favorite_dishes.all %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="border rounded p-2">
+                                            <strong>{{ dish.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ dish.dish_type.name|default:"Разное" }} •
+                                                {{ dish.cooking_time }} мин •
+                                                <span class="badge bg-secondary">{{ dish.get_difficulty_display }}</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning py-2 mb-0">
+                                    <small>Гость не выбрал любимые блюда</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-transparent py-2">
+                                <small class="text-muted">
+                                    Выбрано блюд: {{ guest.favorite_dishes.count }}
+                                </small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-warning text-center py-4">
+                            <h5>😔 На это мероприятие еще не добавлены гости</h5>
+                            <p class="mb-0">
+                                <a href="/event/{{ event.id }}/guests/" class="btn btn-primary mt-2">
+                                    👥 Добавить гостей
+                                </a>
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>📊 Статистика мероприятия</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Всего гостей:</span>
+                                <span class="badge bg-primary rounded-pill">{{ guests.count }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Выбрали блюда:</span>
+                                <span class="badge bg-success rounded-pill">
+                                    {{ guests_with_dishes }}/{{ guests.count }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Всего выбрано блюд:</span>
+                                <span class="badge bg-info rounded-pill">{{ total_dishes }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Среднее на гостя:</span>
+                                <span class="badge bg-warning text-dark rounded-pill">
+                                    {% if guests.count > 0 %}
+                                        {{ total_dishes|floatformat:1 }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>🚀 Быстрые действия</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="/event/{{ event.id }}/guests/" class="btn btn-primary w-100 mb-2">
+                            👥 Добавить гостей
+                        </a>
+                        <a href="/event/{{ event.id }}/menu/" class="btn btn-success w-100 mb-2">
+                            🎯 Сгенерировать меню
+                        </a>
+                        <a href="/create/" class="btn btn-outline-secondary w-100">
+                            🎉 Создать новое
+                        </a>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <h6>💡 Подсказка:</h6>
+                    <p class="mb-0 small">
+                        Нажмите "Редактировать" рядом с именем гостя, чтобы изменить его предпочтения
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+output-format: grouped
+
+strictness: medium
+test-warnings: false
+doc-warnings: false
+member-warnings: false
+
+ignore-paths:
+  - migrations
+  - __pycache__
+  - venv
+  - env
+  - .venv
+  - node_modules
+
+pep8:
+  full: true
+  disable:
+    - D100
+    - D101
+    - D102
+    - D103
+    - D104
+    - D105
+    - D106
+    - D107
+    - D203
+    - D212
+    - D406
+    - D407
+    - D413
+
+pylint:
+  disable:
+    - missing-docstring
+    - too-few-public-methods
+    - no-self-use
+    - protected-access
+    - broad-except
+    - inconsistent-return-statements
+    - redefined-outer-name
+    - unused-argument
+    - too-many-arguments
+    - too-many-locals
+    - too-many-branches
+    - too-many-statements
+    - duplicate-code
+    - fixme
+    - import-error
+
+mccabe:
+  run: true
+  max-complexity: 15
+
+pyflakes:
+  run: true
+
+dodgy:
+  run: false
+
+pydocstyle:
+  run: false
+
+vulture:
+  run: false
+
+bandit:
+  run: false
+
+mypy:
+  run: false

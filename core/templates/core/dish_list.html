@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Все блюда - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h3>🍽️ Все блюда в базе</h3>
+                <p class="mb-0">Выберите любимые блюда для ваших гостей</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for dish in dishes %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 dish-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ dish.name }}</h5>
+                                <p class="card-text">
+                                    <span class="badge bg-secondary">
+                                        {{ dish.dish_type.name|default:"Разное" }}
+                                    </span>
+                                    <span class="badge bg-warning text-dark ms-1">
+                                        ⏱️ {{ dish.cooking_time }} мин
+                                    </span>
+                                </p>
+                                <p class="card-text text-muted small">
+                                    {{ dish.description|truncatechars:100 }}
+                                </p>
+                                <div class="mt-2">
+                                    <span class="badge bg-light text-dark border">
+                                        Сложность: {{ dish.get_difficulty_display }}
+                                    </span>
+                                    <span class="badge bg-light text-dark border ms-1">
+                                        Популярность: {{ dish.popularity_score }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    Подробнее
+                                </a>
+                                <button class="btn btn-sm btn-outline-success float-end">
+                                    ❤️ Выбрать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <h4>😔 Блюд пока нет в базе</h4>
+                        <p>Добавьте блюда через админку или импортируйте данные</p>
+                        <a href="/admin/core/dish/add/" class="btn btn-primary">
+                            ➕ Добавить блюдо
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h4>📊 Статистика</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h5>{{ dishes.count }}</h5>
+                        <p class="text-muted">Всего блюд</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h5>{{ dish_types_count }}</h5>
+                        <p class="text-muted">Типов блюд</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h5>{{ avg_cooking_time|floatformat:0 }}</h5>
+                        <p class="text-muted">Среднее время приготовления (мин)</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h5>{{ easy_dishes }}</h5>
+                        <p class="text-muted">Простых блюд</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    // Простая анимация при наведении
+    document.addEventListener('DOMContentLoaded', function() {
+        const dishCards = document.querySelectorAll('.dish-card');
+        dishCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'transform 0.2s';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

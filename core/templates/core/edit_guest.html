@@ -1,0 +1,170 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Редактирование гостя - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">✏️ Редактирование гостя</h3>
+                        <p class="mb-0">Мероприятие: {{ event.name }}</p>
+                    </div>
+                    <a href="/event/{{ event.id }}/show/" class="btn btn-light btn-sm">
+                        ← Назад
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Имя гостя -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Имя гостя:</label>
+                        <input type="text"
+                               name="guest_name"
+                               class="form-control form-control-lg"
+                               value="{{ guest.name }}"
+                               required>
+                        <div class="form-text">Измените имя гостя, если нужно</div>
+                    </div>
+
+                    <!-- Выбор любимых блюд -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Любимые блюда:</label>
+                        <p class="text-muted">Выберите блюда, которые нравятся этому гостю</p>
+
+                        <div class="row">
+                            <!-- Фильтры по типам блюд -->
+                            <div class="col-md-3 mb-3">
+                                <div class="list-group">
+                                    <button type="button" class="list-group-item list-group-item-action filter-btn active" data-filter="all">
+                                        Все блюда
+                                    </button>
+                                    {% for dish_type in dish_types %}
+                                    <button type="button" class="list-group-item list-group-item-action filter-btn" data-filter="type-{{ dish_type.id }}">
+                                        {{ dish_type.name }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Список блюд -->
+                            <div class="col-md-9">
+                                <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                                    <div class="row" id="dishes-container">
+                                        {% for dish in dishes %}
+                                        <div class="col-md-6 mb-2 dish-item" data-types="type-{{ dish.dish_type.id|default:0 }}">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       name="favorite_dishes"
+                                                       value="{{ dish.id }}"
+                                                       id="dish-{{ dish.id }}"
+                                                       {% if dish.id in selected_dishes %}checked{% endif %}>
+                                                <label class="form-check-label w-100" for="dish-{{ dish.id }}">
+                                                    <div class="border rounded p-2 {% if dish.id in selected_dishes %}border-success bg-success-light{% endif %}">
+                                                        <strong>{{ dish.name }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            {{ dish.dish_type.name|default:"Разное" }} •
+                                                            {{ dish.cooking_time }} мин
+                                                        </small>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="col-12 text-center py-3">
+                                            <p class="text-muted">Нет блюд в базе данных</p>
+                                            <a href="/admin/core/dish/add/" class="btn btn-sm btn-outline-primary">
+                                                ➕ Добавить блюдо
+                                            </a>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/event/{{ event.id }}/show/" class="btn btn-secondary">
+                            ← Отмена
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                💾 Сохранить изменения
+                            </button>
+                            <a href="/event/{{ event.id }}/guest/{{ guest.id }}/delete/"
+                               class="btn btn-outline-danger ms-2"
+                               onclick="return confirm('Удалить гостя из мероприятия?')">
+                                🗑️ Удалить гостя
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Подсказка -->
+        <div class="alert alert-info mt-3">
+            <h6>💡 Совет:</h6>
+            <p class="mb-0">Выберите 3-5 любимых блюд для каждого гостя для более точного подбора меню</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Фильтрация блюд по типам
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const dishItems = document.querySelectorAll('.dish-item');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Обновляем активную кнопку
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.dataset.filter;
+
+                // Показываем/скрываем блюда
+                dishItems.forEach(item => {
+                    if (filter === 'all' || item.dataset.types.includes(filter)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Подсветка выбранных блюд
+        const checkboxes = document.querySelectorAll('input[name="favorite_dishes"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const labelDiv = this.closest('.form-check').querySelector('.border.rounded');
+                if (this.checked) {
+                    labelDiv.classList.add('border-success', 'bg-success-light');
+                } else {
+                    labelDiv.classList.remove('border-success', 'bg-success-light');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+<style>
+    .bg-success-light {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+    }
+</style>

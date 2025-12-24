@@ -1,0 +1,254 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Рекомендованное меню - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- Шапка мероприятия -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">🎯 Рекомендованное меню</h3>
+                        <p class="mb-0">{{ event.name }} • {{ event.event_date }} • {{ event.number_of_guests }} гостей</p>
+                    </div>
+                    <a href="/event/{{ event.id }}/show/" class="btn btn-light btn-sm">
+                        👥 Показать гостей
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Топ популярных блюд -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>🏆 Топ популярных блюд</h4>
+                <p class="mb-0 text-muted">Блюда, которые нравятся наибольшему числу гостей</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for dish, count in popular_dishes %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-success border-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title">{{ dish.name }}</h5>
+                                        <p class="card-text mb-1">
+                                            <span class="badge bg-secondary">
+                                                {{ dish.dish_type.name|default:"Разное" }}
+                                            </span>
+                                            <span class="badge bg-warning text-dark ms-1">
+                                                ⏱️ {{ dish.cooking_time }} мин
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success fs-6">
+                                            {{ count }}/{{ event.number_of_guests }}
+                                        </span>
+                                        <div class="small text-muted mt-1">гoстей</div>
+                                    </div>
+                                </div>
+
+                                <!-- Прогресс-бар популярности -->
+                                <div class="mt-3">
+                                    <div class="progress" style="height: 10px;">
+                                        {% widthratio count event.number_of_guests 100 as popularity_percent %}
+                                        <div class="progress-bar bg-success"
+                                             role="progressbar"
+                                             style="width: {{ popularity_percent }}%"
+                                             aria-valuenow="{{ popularity_percent }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted text-center mt-1">
+                                        {{ popularity_percent }}% гостей выбрали это блюдо
+                                    </div>
+                                </div>
+
+                                <!-- Информация о блюде -->
+                                <div class="mt-3">
+                                    <p class="card-text small text-muted">
+                                        {{ dish.description|truncatechars:150 }}
+                                    </p>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge bg-light text-dark border">
+                                            🧑‍🍳 {{ dish.get_difficulty_display }}
+                                        </span>
+                                        <span class="badge bg-light text-dark border">
+                                            ⭐ {{ dish.popularity_score|floatformat:1 }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Распределение по типам -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📊 Распределение по типам блюд</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Тип блюда</th>
+                                <th>Количество</th>
+                                <th>Доля</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for dish_type, count in type_distribution %}
+                            <tr>
+                                <td>{{ dish_type }}</td>
+                                <td>{{ count }}</td>
+                                <td>
+                                    <div class="progress" style="height: 8px;">
+                                        {% widthratio count popular_dishes|length 100 as percent %}
+                                        <div class="progress-bar bg-info"
+                                             style="width: {{ percent }}%">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ percent|floatformat:0 }}%</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🎯 Рекомендации по меню</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6>💡 Советы по составлению меню:</h6>
+                            <ul class="mb-0">
+                                <li>Выберите 3-5 самых популярных блюд</li>
+                                <li>Сочетайте разные типы блюд (закуски, основные, десерты)</li>
+                                <li>Учитывайте время приготовления</li>
+                                <li>Помните о возможных аллергиях гостей</li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-3">
+                            <h6>✅ Идеальное меню для {{ event.number_of_guests }} гостей:</h6>
+                            <ol>
+                                <li>2-3 закуски</li>
+                                <li>1-2 основных блюда</li>
+                                <li>1-2 десерта</li>
+                                <li>2-3 напитка</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка для перехода к списку покупок -->
+        <div class="card mt-4 border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">🛒 Следующий шаг: список покупок</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <h5>Готовы сделать покупки?</h5>
+                        <p class="text-muted">
+                            Сформируйте подробный список продуктов с точным количеством для {{ event.number_of_guests }} гостей
+                        </p>
+
+                        <a href="/event/{{ event.id }}/shopping/"
+                           class="btn btn-success btn-lg px-5 py-3 mt-3">
+                            📋 Сформировать список покупок
+                        </a>
+
+                        <div class="mt-4">
+                            <div class="alert alert-info">
+                                <h6>💡 Что будет в списке:</h6>
+                                <ul class="mb-0">
+                                    <li>Точное количество каждого продукта</li>
+                                    <li>Группировка по категориям (овощи, мясо и т.д.)</li>
+                                    <li>Ориентировочная стоимость</li>
+                                    <li>Возможность отметить купленные продукты</li>
+                                    <li>Печать списка одним кликом</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки навигации -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="/event/{{ event.id }}/show/" class="btn btn-outline-primary w-100">
+                            ← Вернуться к гостям
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="/create/" class="btn btn-outline-success w-100">
+                            🎉 Создать новое мероприятие
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="/dishes/" class="btn btn-outline-secondary w-100">
+                            🍽️ Все блюда
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Анимация прогресс-баров при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация для карточек
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Подсветка самых популярных блюд
+        const popularBadges = document.querySelectorAll('.bg-success.fs-6');
+        popularBadges.forEach(badge => {
+            const count = parseInt(badge.textContent.split('/')[0]);
+            const total = parseInt(badge.textContent.split('/')[1]);
+            const percentage = (count / total) * 100;
+
+            if (percentage > 50) {
+                badge.classList.add('p-2');
+                badge.innerHTML = '👑 ' + badge.innerHTML;
+            }
+        });
+    });
+</script>
+{% endblock %}

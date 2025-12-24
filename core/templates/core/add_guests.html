@@ -1,0 +1,68 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>🎉 Добавление гостей: {{ event.name }}</h3>
+                <p class="mb-0">Дата: {{ event.event_date }} | Гостей: {{ event.number_of_guests }}</p>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% for i in guest_range %}
+                    <div class="card mb-3 border-primary">
+                        <div class="card-header bg-light">
+                            <h5>👤 Гость {{ i }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Имя гостя:</label>
+                                <input type="text" name="guest_{{ i }}_name"
+                                       class="form-control"
+                                       placeholder="Введите имя"
+                                       required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Любимые блюда:</label>
+                                <select name="guest_{{ i }}_dishes"
+                                        class="form-select"
+                                        multiple
+                                        size="4"
+                                        style="height: 150px;">
+                                    {% for dish in dishes %}
+                                    <option value="{{ dish.id }}">
+                                        {{ dish.name }} ({{ dish.dish_type.name|default:"Разное" }})
+                                    </option>
+                                    {% empty %}
+                                    <option disabled>Нет блюд в базе данных</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">
+                                    🖱️ Удерживайте Ctrl (Cmd на Mac) для выбора нескольких блюд
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/create/" class="btn btn-secondary">← Назад</a>
+                        <button type="submit" class="btn btn-success">
+                            📊 Составить меню →
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <h5>💡 Как это работает?</h5>
+            <p>Система проанализирует, какие блюда нравятся наибольшему числу гостей,
+                и предложит оптимальное меню для вашего праздника.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

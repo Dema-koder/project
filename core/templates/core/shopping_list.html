@@ -1,0 +1,251 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Список покупок - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- Шапка -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">🛒 Список покупок</h3>
+                        <p class="mb-0">
+                            {{ event.name }} • {{ event.event_date }} • {{ guests_count }} гостей
+                        </p>
+                    </div>
+                    <div>
+                        <a href="/event/{{ event.id }}/menu/" class="btn btn-light btn-sm me-2">
+                            ← Вернуться к меню
+                        </a>
+                        <button onclick="window.print()" class="btn btn-light btn-sm">
+                            🖨️ Распечатать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Информация о меню -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>🍽️ Выбранное меню</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for dish in popular_dishes %}
+                    <div class="col-md-2 col-6 mb-2">
+                        <div class="border rounded p-2 text-center">
+                            <strong>{{ dish.name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ dish.dish_type.name|default:"Разное" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Список покупок по категориям -->
+        {% for category, items in categories.items %}
+        <div class="card mb-4 shopping-category">
+            <div class="card-header bg-light">
+                <h4 class="mb-0">
+                    {% if category == 'Овощи' %}🥬
+                    {% elif category == 'Мясо' %}🥩
+                    {% elif category == 'Молочные' %}🥛
+                    {% elif category == 'Бакалея' %}🌾
+                    {% elif category == 'Напитки' %}🥤
+                    {% else %}📦{% endif %}
+                    {{ category }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th width="40%">Продукт</th>
+                            <th width="20%">Количество</th>
+                            <th width="20%">Для блюд</th>
+                            <th width="20%" class="text-center">Куплено</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in items %}
+                        <tr class="shopping-item">
+                            <td>
+                                <strong>{{ item.ingredient.name }}</strong>
+                                <br>
+                                <small class="text-muted">Ед. изм.: {{ item.ingredient.get_unit_display }}</small>
+                            </td>
+                            <td>
+                                    <span class="badge bg-info fs-6">
+                                        {{ item.quantity|floatformat:1 }}
+                                    </span>
+                                {% if item.ingredient.average_price %}
+                                <br>
+                                <small class="text-muted">
+                                    ~{{ item.ingredient.average_price }} ₽/{{ item.ingredient.unit }}
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="small">
+                                    {% for dish in item.dishes|slice:":3" %}
+                                    <span class="badge bg-light text-dark mb-1">{{ dish }}</span><br>
+                                    {% endfor %}
+                                    {% if item.dishes|length > 3 %}
+                                    <small class="text-muted">+ еще {{ item.dishes|length|add:"-3" }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="form-check form-check-lg d-inline-block">
+                                    <input class="form-check-input purchase-checkbox"
+                                           type="checkbox"
+                                           data-item-id="{{ item.ingredient.id }}"
+                                           style="transform: scale(1.5);">
+                                    <label class="form-check-label"></label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Итоговая стоимость -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">💰 Итоговая стоимость</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>{{ total_cost|floatformat:2 }} ₽</h3>
+                        <p class="text-muted">Ориентировочная стоимость закупок</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <h6>💡 Экономия:</h6>
+                            <ul class="mb-0">
+                                <li>Средняя стоимость на гостя: <strong>{{ per_guest_cost|floatformat:2 }} ₽</strong></li>
+                                <li>Закупка оптом может снизить стоимость на 15-20%</li>
+                                <li>Сезонные продукты могут быть дешевле</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="/event/{{ event.id }}/menu/" class="btn btn-outline-primary w-100">
+                            ← Вернуться к меню
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="/create/" class="btn btn-outline-success w-100">
+                            🎉 Новое мероприятие
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button onclick="window.print()" class="btn btn-success w-100">
+                            🖨️ Распечатать список
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Восстанавливаем состояние чекбоксов из localStorage
+        const checkboxes = document.querySelectorAll('.purchase-checkbox');
+        checkboxes.forEach(checkbox => {
+            const itemId = checkbox.dataset.itemId;
+            const savedState = localStorage.getItem(`purchase_${itemId}`);
+            if (savedState === 'true') {
+                checkbox.checked = true;
+                checkbox.closest('tr').classList.add('table-success');
+            }
+
+            // Обработчик изменения состояния
+            checkbox.addEventListener('change', function() {
+                const itemId = this.dataset.itemId;
+                localStorage.setItem(`purchase_${itemId}`, this.checked);
+
+                if (this.checked) {
+                    this.closest('tr').classList.add('table-success');
+                } else {
+                    this.closest('tr').classList.remove('table-success');
+                }
+
+                updateProgress();
+            });
+        });
+
+        // Функция обновления прогресса
+        function updateProgress() {
+            const totalItems = checkboxes.length;
+            const purchasedItems = document.querySelectorAll('.purchase-checkbox:checked').length;
+            const progressPercent = (purchasedItems / totalItems) * 100;
+
+            // Можно добавить индикатор прогресса
+            console.log(`Куплено: ${purchasedItems}/${totalItems} (${progressPercent.toFixed(1)}%)`);
+        }
+
+        // Инициализируем прогресс
+        updateProgress();
+
+        // Анимация при наведении
+        const shoppingItems = document.querySelectorAll('.shopping-item');
+        shoppingItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
+        });
+    });
+</script>
+
+<style>
+    .shopping-category {
+        border-left: 5px solid #007bff;
+    }
+
+    .table-success {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+    }
+
+    @media print {
+        .btn, .alert, .card-header .btn {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #000 !important;
+            break-inside: avoid;
+        }
+
+        .shopping-category {
+            border-left: 3px solid #000 !important;
+        }
+    }
+</style>
+{% endblock %}

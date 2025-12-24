@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Удаление гостя - Праздничное меню{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">🗑️ Удаление гостя</h3>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <h5>Вы уверены, что хотите удалить гостя?</h5>
+                    <div class="alert alert-warning">
+                        <strong>Гость:</strong> {{ guest.name }}<br>
+                        <strong>Мероприятие:</strong> {{ event.name }}
+                    </div>
+                    <p class="text-muted">
+                        Гость будет удален только из этого мероприятия.<br>
+                        Его данные останутся в базе для возможного использования в будущем.
+                    </p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="/event/{{ event.id }}/guest/{{ guest.id }}/edit/" class="btn btn-secondary">
+                            ← Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Точно удалить?')">
+                            Да, удалить гостя
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
